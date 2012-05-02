@@ -12,6 +12,7 @@ typedef struct keysym_charmap {
   int printable;
 } keysym_charmap_t;
 
-extern int zdo_key(char *keylist);
+extern int zdo_key(char *keylist, const char *type);
+extern int zdo_type(const char *words);
 
 #endif
