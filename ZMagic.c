@@ -67,3 +67,17 @@ int cmd_exec(int argc, char *argv[]) {
 	return FALSE;
 }
 
+void consume_args(context_t *context, int count) {
+	if (count > context->argc) {
+		fprintf(stderr,
+				"Can't consume %d args; are only %d available. This is a bug.\n",
+				count, context->argc);
+		context->argv += context->argc;
+		context->argc = 0;
+		return;
+	}
+
+	context->argv += count;
+	context->argc -= count;
+}
+

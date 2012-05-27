@@ -146,3 +146,32 @@ int zdo_type(const char *words) {
 	XCloseDisplay(disp);
 }
 
+int zdo_mousemove(int x, int y, int is_rel) {
+	if (is_rel) {
+		//move mouse relatively
+		return zdo_mousemove_relative(x, y);	
+	}
+	else {
+		Display* disp = XOpenDisplay( NULL );
+		Window screen_root = DefaultRootWindow(disp);
+	
+		if (!XWarpPointer(disp, None, screen_root, 0, 0, 0, 0, x, y)) {
+			return ZDO_ERROR;
+		}
+	
+		XFlush(disp);
+		return ZDO_SUCCESS;
+	}
+}
+
+int zdo_mousemove_relative(int dx, int dy) {
+	Display* disp = XOpenDisplay( NULL );
+	
+	if (!XWarpPointer(disp, None, None, 0, 0, 0, 0, dx, dy)) {
+		return ZDO_ERROR;
+	}
+	
+	XFlush(disp);
+	return ZDO_SUCCESS;
+}
+
