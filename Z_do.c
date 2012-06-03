@@ -7,6 +7,7 @@
 #include <X11/Xlib.h>
 #include "Z_do.h"
 #include "Z_do_util.h"
+#include "unistd.h"
 
 static int zdo_press_key_list(Display* disp, KeyCode *keys, int nKeys, const char *type) {
 	int i;
@@ -173,5 +174,121 @@ int zdo_mousemove_relative(int dx, int dy) {
 	
 	XFlush(disp);
 	return ZDO_SUCCESS;
+}
+
+int zdo_mousedown(int button) {
+	Display* disp = XOpenDisplay( NULL );
+	
+	if (!XTestFakeButtonEvent(disp, button, 1, CurrentTime)) {
+		return ZDO_ERROR;
+	}
+	
+	XFlush(disp);
+	return ZDO_SUCCESS;
+}
+
+int zdo_mouseup(int button) {
+	Display* disp = XOpenDisplay( NULL );
+	
+	if (!XTestFakeButtonEvent(disp, button, 0, CurrentTime)) {
+		return ZDO_ERROR;
+	}
+	
+	XFlush(disp);
+	return ZDO_SUCCESS;
+}
+
+int zdo_click(int button, int repeat, unsigned long delay) {
+	int i;
+	int ret;
+	for (i=0; i<repeat; i++) {
+		if (zdo_mousedown(button) == ZDO_ERROR)
+			return ZDO_ERROR;
+		if (zdo_mouseup(button) == ZDO_ERROR)
+			return ZDO_ERROR;
+		if (i != repeat-1)
+			usleep(delay);
+	}
+	return ZDO_SUCCESS;
+}
+
+
+void addListener(Display* display, Window r) {
+    //get children list
+    unsigned int listnum;
+    Window parent;
+    Window root;
+    Window *wa;
+
+    XQueryTree(display, r, &root, &parent, &wa, &listnum);
+    if (wa==NULL) {
+        return;
+    }
+    int i=0;
+    //printf("listnum:%d\n", listnum);
+    for (i=0; i<listnum; i++) {
+        Window w=wa[i];
+        //printf("alive here?\n");
+        XWindowAttributes tattributes;
+        XGetWindowAttributes(display, w, &tattributes);
+        //printf("map_state:%d,width:%d,height:%d\n", tattributes.map_state,
+        //        tattributes.width, tattributes.height);
+        if (tattributes.map_state==2) {
+            XSelectInput(display, w, KeyPressMask);
+            XSelectInput(display, w, PointerMotionMask);
+            XSelectInput(display, w, KeyReleaseMask);
+            //XSelectInput(display, w, ButtonPressMask);
+        }
+        if (tattributes.map_state==2) {
+            //XSelectInput(display, w, ButtonPressMask);
+            //XGrabPointer(display,w,True,ButtonPressMask,GrabModeAsync,GrabModeAsync,None,None,CurrentTime);
+            //XGrabKeyboard(display, w, True, GrabModeAsync, GrabModeAsync, CurrentTime );
+        }
+        
+        addListener(display, w);
+    }
+}
+
+int zdo_getmouselocation() {
+	Display* disp = XOpenDisplay( NULL );
+	//XEvent *event_return;
+	//XNextEvent(disp, event_return);
+	//fprintf(stderr, "%d\n", XPending(disp));
+	//XFlush(disp);
+	
+	//XSetErrorHandler(my_handler);
+          
+    Screen *screen=XDefaultScreenOfDisplay(disp);
+    Window window=XRootWindowOfScreen(screen);
+
+    addListener(disp, window);
+	
+	
+	int f=1;
+    while (f) {
+        if (XPending(disp)) {
+            int eq=XEventsQueued(disp, QueuedAlready);
+            printf("events num in queue:%d\n", eq);
+            XEvent e;
+            XNextEvent(disp, &e);
+            printf("event type:%d\n", e.type);
+            if (e.type == KeyPress) {
+                XKeyEvent y=e.xkey;
+                unsigned int keycode=y.keycode;
+                unsigned int state=y.state;
+                printf("keycode:%d,state:%d\n", keycode, state);
+                break;
+            }else if(e.type==ButtonPress){
+                XButtonEvent xbutton=e.xbutton;
+                printf("x:%d,y:%d,button:%d\n",xbutton.x,xbutton.y, xbutton.button);
+                //XSendEvent(disp,xbutton.window,0,KeyPressMask,&e);
+            }
+        }
+    }
+	return 1;
+}
+
+void zdo_sleep(double seconds) {
+	usleep(seconds * 1000000);
 }
 

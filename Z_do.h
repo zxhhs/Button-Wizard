@@ -16,5 +16,10 @@ extern int zdo_key(char *keylist, const char *type);
 extern int zdo_type(const char *words);
 extern int zdo_mousemove(int x, int y, int is_rel);
 extern int zdo_mousemove_relative(int dx, int dy);
+extern int zdo_mousedown(int button);
+extern int zdo_mouseup(int button);
+extern int zdo_click(int button, int repeat, unsigned long delay);
+extern int zdo_getmouselocation();
+extern void zdo_sleep(double seconds);
 
 #endif
