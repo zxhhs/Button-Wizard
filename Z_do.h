@@ -19,7 +19,7 @@ extern int zdo_mousemove_relative(int dx, int dy);
 extern int zdo_mousedown(int button);
 extern int zdo_mouseup(int button);
 extern int zdo_click(int button, int repeat, unsigned long delay);
-extern int zdo_getmouselocation();
+extern int zdo_getmouselocation(int *x, int *y);
 extern void zdo_sleep(double seconds);
 
 #endif

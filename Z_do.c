@@ -221,6 +221,9 @@ void addListener(Display* display, Window r) {
     Window *wa;
 
     XQueryTree(display, r, &root, &parent, &wa, &listnum);
+    
+    
+    //XSelectInput(display, root, ButtonPressMask);
     if (wa==NULL) {
         return;
     }
@@ -231,38 +234,55 @@ void addListener(Display* display, Window r) {
         //printf("alive here?\n");
         XWindowAttributes tattributes;
         XGetWindowAttributes(display, w, &tattributes);
+        
+        //XSelectInput(display, w, PointerMotionMask);
         //printf("map_state:%d,width:%d,height:%d\n", tattributes.map_state,
         //        tattributes.width, tattributes.height);
-        if (tattributes.map_state==2) {
-            XSelectInput(display, w, KeyPressMask);
-            XSelectInput(display, w, PointerMotionMask);
-            XSelectInput(display, w, KeyReleaseMask);
+        //if (tattributes.map_state==2) {
+            //XSelectInput(display, w, KeyPressMask);
+            //XSelectInput(display, w, PointerMotionMask);
+            //XSelectInput(display, w, KeyReleaseMask);
             //XSelectInput(display, w, ButtonPressMask);
-        }
+        //}
         if (tattributes.map_state==2) {
             //XSelectInput(display, w, ButtonPressMask);
+            XGrabPointer(display, w, True, PointerMotionMask|ButtonPressMask, GrabModeAsync, GrabModeAsync, None, None, CurrentTime);
             //XGrabPointer(display,w,True,ButtonPressMask,GrabModeAsync,GrabModeAsync,None,None,CurrentTime);
-            //XGrabKeyboard(display, w, True, GrabModeAsync, GrabModeAsync, CurrentTime );
+            //XGrabPointer(display,w,True,ButtonPressMask,GrabModeAsync,GrabModeAsync,None,None,CurrentTime);
+            //XGrabButton(display, AnyButton, AnyModifier, w, True, ButtonPressMask, GrabModeAsync, GrabModeAsync, None, None);
+            //XSelectInput(display, w, PointerMotionMask);
+            //XSelectInput(display, w, ButtonPressMask);
+            XGrabKeyboard(display, w, True, GrabModeAsync, GrabModeAsync, CurrentTime );
         }
         
         addListener(display, w);
     }
 }
 
-int zdo_getmouselocation() {
+void removeListener(Display* display) {
+
+	XUngrabPointer(display, CurrentTime);
+	//XUngrabButton(display, CurrentTime);
+}
+
+int zdo_getmouselocation(int *x, int *y) {
 	Display* disp = XOpenDisplay( NULL );
-	//XEvent *event_return;
-	//XNextEvent(disp, event_return);
-	//fprintf(stderr, "%d\n", XPending(disp));
-	//XFlush(disp);
 	
-	//XSetErrorHandler(my_handler);
+	
           
     Screen *screen=XDefaultScreenOfDisplay(disp);
     Window window=XRootWindowOfScreen(screen);
+    Window root_return = NULL;
+    Window w_return = NULL;
+    int win_x_return, win_y_return;
+    unsigned int mask_return;
+    
+    return XQueryPointer(disp, window,
+                        &root_return, &w_return, x, y, &win_x_return, 
+                        &win_y_return, &mask_return);
 
     addListener(disp, window);
-	
+	XAllowEvents(disp, AsyncBoth, CurrentTime);
 	
 	int f=1;
     while (f) {
@@ -279,12 +299,38 @@ int zdo_getmouselocation() {
                 printf("keycode:%d,state:%d\n", keycode, state);
                 break;
             }else if(e.type==ButtonPress){
+            	//removeListener(disp, window);
                 XButtonEvent xbutton=e.xbutton;
                 printf("x:%d,y:%d,button:%d\n",xbutton.x,xbutton.y, xbutton.button);
+                
+                removeListener(disp);
+                //XFlush(disp);
+                //XPutBackEvent(disp, &e);
+                //XSetInputFocus(disp, xbutton.window, RevertToParent, CurrentTime);
+                zdo_click(3, 1, 0);
+                //sleep(1);
+                
+                //XGrabPointer(disp,xbutton.window,True,ButtonPressMask,GrabModeAsync,GrabModeAsync,None,None,CurrentTime);
+                //e.time = CurrentTime;
+                //XAllowEvents(disp, SyncBoth, CurrentTime);
+                //if (XSendEvent(disp,xbutton.window,0,ButtonPressMask,&e) == 0)
+                //	printf("error\n");
+                //XSync(disp, False);	
+                
+                //sleep(2);
+                //XFlush(disp);
                 //XSendEvent(disp,xbutton.window,0,KeyPressMask,&e);
+                //removeListener(disp, window);
+                //break;
+                //printf("zx\n");
+                addListener(disp, window);
+            }
+            else if (e.type==MotionNotify) {
+                printf("Motion Notify - %d, %d\n", e.xmotion.x_root, e.xmotion.y_root);
             }
         }
     }
+    removeListener(disp);
 	return 1;
 }
 
