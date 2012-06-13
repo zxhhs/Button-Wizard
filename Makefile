@@ -2,7 +2,7 @@ TARGET = ZMagic
 
 CMDOBJS = cmd_key.o cmd_sleep.o cmd_click.o cmd_getmouselocation.o \
           cmd_help.o cmd_mousedown.o cmd_mousemove.o cmd_mousemove_relative.o \
-          cmd_mouseup.o cmd_type.o cmd_version.o
+          cmd_mouseup.o cmd_type.o cmd_version.o cmd_record.o
           
 LIBS = -lX11 -lXtst
 

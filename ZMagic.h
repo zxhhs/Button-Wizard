@@ -25,5 +25,6 @@ extern int cmd_mousemove_relative(context_t *context);
 extern int cmd_mouseup(context_t *context);
 extern int cmd_type(context_t *context);
 extern int cmd_version(context_t *context);
+extern int cmd_record(context_t *context);
 
 #endif

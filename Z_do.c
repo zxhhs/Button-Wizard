@@ -272,8 +272,8 @@ int zdo_getmouselocation(int *x, int *y) {
           
     Screen *screen=XDefaultScreenOfDisplay(disp);
     Window window=XRootWindowOfScreen(screen);
-    Window root_return = NULL;
-    Window w_return = NULL;
+    Window root_return = 0;
+    Window w_return = 0;
     int win_x_return, win_y_return;
     unsigned int mask_return;
     

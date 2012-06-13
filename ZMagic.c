@@ -5,22 +5,24 @@ struct dispatch {
   const char *name;
   int (*func)(context_t *context);
 } dispatch[] = {
-
-  { "help", cmd_help, },
-  { "version", cmd_version, },
-
   { "click", cmd_click, },
-  { "getmouselocation", cmd_getmouselocation, },
-  { "key", cmd_key, },
-  { "keydown", cmd_key, },
-  { "keyup", cmd_key, },
+  { "mouseup", cmd_mouseup, },
   { "mousedown", cmd_mousedown, },
   { "mousemove", cmd_mousemove, },
   { "mousemove_relative", cmd_mousemove_relative, },
-  { "mouseup", cmd_mouseup, },
+
+  { "key", cmd_key, },
+  { "keydown", cmd_key, },
+  { "keyup", cmd_key, },
   { "type", cmd_type, },
 
   { "sleep", cmd_sleep, },
+  
+  { "getmouselocation", cmd_getmouselocation, },
+  { "record", cmd_record, },
+  
+  { "help", cmd_help, },
+  { "version", cmd_version, },
 
   { NULL, NULL, },
 };
