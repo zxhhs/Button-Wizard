@@ -5,9 +5,17 @@
 #include <X11/Xutil.h>
 #include <X11/extensions/XTest.h>
 #include <X11/Xlib.h>
+#include <termios.h>
+#include <fcntl.h>
+#include <time.h>
+#include <unistd.h>
+#include <stdarg.h>
+#include <malloc.h>
+#include <sys/stat.h>
+
 #include "Z_do.h"
 #include "Z_do_util.h"
-#include "unistd.h"
+
 
 static int zdo_press_key_list(Display* disp, KeyCode *keys, int nKeys, const char *type) {
 	int i;
@@ -34,7 +42,7 @@ int zdo_key(char *keylist, const char *type) {
     Display* disp = XOpenDisplay( NULL );
     
     if (strcspn(keylist, " \t\n.-[]{}\\|") != strlen(keylist)) {
-		fprintf(stderr, "Error: Invalid key sequence '%s'\n", keylist);
+		zdo_alert('r', "Error: Invalid key sequence '%s'\n", keylist);
 		return ZDO_ERROR;
 	}
     
@@ -57,7 +65,7 @@ int zdo_key(char *keylist, const char *type) {
 					key = (unsigned int) atoi(tok);
 				}
 				else {
-					fprintf(stderr, 
+					zdo_alert('r', 
 						"Error: No such key name '%s'. Ignoring it.\n", 
 						tok);
 					continue;
@@ -127,7 +135,7 @@ int zdo_type(const char *words) {
 				key = (unsigned int) atoi(tok);
 			}
 			else {
-				fprintf(stderr, 
+				zdo_alert('r', 
 					"Error: No such key name '%s'. Ignoring it.\n", 
 					tok);
 				continue;
@@ -214,62 +222,23 @@ int zdo_click(int button, int repeat, unsigned long delay) {
 
 
 void addListener(Display* display, Window r) {
-    //get children list
-    unsigned int listnum;
-    Window parent;
-    Window root;
-    Window *wa;
-
-    XQueryTree(display, r, &root, &parent, &wa, &listnum);
-    
-    
-    //XSelectInput(display, root, ButtonPressMask);
-    if (wa==NULL) {
-        return;
-    }
-    int i=0;
-    //printf("listnum:%d\n", listnum);
-    for (i=0; i<listnum; i++) {
-        Window w=wa[i];
-        //printf("alive here?\n");
-        XWindowAttributes tattributes;
-        XGetWindowAttributes(display, w, &tattributes);
-        
-        //XSelectInput(display, w, PointerMotionMask);
-        //printf("map_state:%d,width:%d,height:%d\n", tattributes.map_state,
-        //        tattributes.width, tattributes.height);
-        //if (tattributes.map_state==2) {
-            //XSelectInput(display, w, KeyPressMask);
-            //XSelectInput(display, w, PointerMotionMask);
-            //XSelectInput(display, w, KeyReleaseMask);
-            //XSelectInput(display, w, ButtonPressMask);
-        //}
-        if (tattributes.map_state==2) {
-            //XSelectInput(display, w, ButtonPressMask);
-            XGrabPointer(display, w, True, PointerMotionMask|ButtonPressMask, GrabModeAsync, GrabModeAsync, None, None, CurrentTime);
-            //XGrabPointer(display,w,True,ButtonPressMask,GrabModeAsync,GrabModeAsync,None,None,CurrentTime);
-            //XGrabPointer(display,w,True,ButtonPressMask,GrabModeAsync,GrabModeAsync,None,None,CurrentTime);
-            //XGrabButton(display, AnyButton, AnyModifier, w, True, ButtonPressMask, GrabModeAsync, GrabModeAsync, None, None);
-            //XSelectInput(display, w, PointerMotionMask);
-            //XSelectInput(display, w, ButtonPressMask);
-            XGrabKeyboard(display, w, True, GrabModeAsync, GrabModeAsync, CurrentTime );
-        }
-        
-        addListener(display, w);
-    }
 }
 
-void removeListener(Display* display) {
+int waitForSpace() {
+	return 1;
+}
 
-	XUngrabPointer(display, CurrentTime);
-	//XUngrabButton(display, CurrentTime);
+int zdo_record(char *file, int is_continue, int mouse_mask, int key_mask) {
+	return 1;
+  
+}
+
+void zdo_sleep(double seconds) {
+	usleep(seconds * 1000000);
 }
 
 int zdo_getmouselocation(int *x, int *y) {
-	Display* disp = XOpenDisplay( NULL );
-	
-	
-          
+	Display* disp = XOpenDisplay( NULL );          
     Screen *screen=XDefaultScreenOfDisplay(disp);
     Window window=XRootWindowOfScreen(screen);
     Window root_return = 0;
@@ -280,61 +249,23 @@ int zdo_getmouselocation(int *x, int *y) {
     return XQueryPointer(disp, window,
                         &root_return, &w_return, x, y, &win_x_return, 
                         &win_y_return, &mask_return);
-
-    addListener(disp, window);
-	XAllowEvents(disp, AsyncBoth, CurrentTime);
-	
-	int f=1;
-    while (f) {
-        if (XPending(disp)) {
-            int eq=XEventsQueued(disp, QueuedAlready);
-            printf("events num in queue:%d\n", eq);
-            XEvent e;
-            XNextEvent(disp, &e);
-            printf("event type:%d\n", e.type);
-            if (e.type == KeyPress) {
-                XKeyEvent y=e.xkey;
-                unsigned int keycode=y.keycode;
-                unsigned int state=y.state;
-                printf("keycode:%d,state:%d\n", keycode, state);
-                break;
-            }else if(e.type==ButtonPress){
-            	//removeListener(disp, window);
-                XButtonEvent xbutton=e.xbutton;
-                printf("x:%d,y:%d,button:%d\n",xbutton.x,xbutton.y, xbutton.button);
-                
-                removeListener(disp);
-                //XFlush(disp);
-                //XPutBackEvent(disp, &e);
-                //XSetInputFocus(disp, xbutton.window, RevertToParent, CurrentTime);
-                zdo_click(3, 1, 0);
-                //sleep(1);
-                
-                //XGrabPointer(disp,xbutton.window,True,ButtonPressMask,GrabModeAsync,GrabModeAsync,None,None,CurrentTime);
-                //e.time = CurrentTime;
-                //XAllowEvents(disp, SyncBoth, CurrentTime);
-                //if (XSendEvent(disp,xbutton.window,0,ButtonPressMask,&e) == 0)
-                //	printf("error\n");
-                //XSync(disp, False);	
-                
-                //sleep(2);
-                //XFlush(disp);
-                //XSendEvent(disp,xbutton.window,0,KeyPressMask,&e);
-                //removeListener(disp, window);
-                //break;
-                //printf("zx\n");
-                addListener(disp, window);
-            }
-            else if (e.type==MotionNotify) {
-                printf("Motion Notify - %d, %d\n", e.xmotion.x_root, e.xmotion.y_root);
-            }
-        }
-    }
-    removeListener(disp);
-	return 1;
 }
 
-void zdo_sleep(double seconds) {
-	usleep(seconds * 1000000);
+void zdo_alert(char color, char *format, ...) {
+	char s[100];
+	va_list args;
+	va_start(args, format);
+
+	vsprintf(s, format, args);
+	if (color == 'g') {
+		fprintf(stderr, "\x1b[32m%s\x1b[0m", s);
+	}
+	else if (color == 'b') {
+		fprintf(stderr, "\x1b[34m%s\x1b[0m", s);
+	}
+	else {
+		fprintf(stderr, "\x1b[31m%s\x1b[0m", s);
+	}
 }
+
 

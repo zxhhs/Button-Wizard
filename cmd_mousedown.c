@@ -10,14 +10,14 @@ int cmd_mousedown(context_t *context) {
 	char c;
 	
 	static const char *usage =
-    "Usage: %s [--help] <button> \n"
-    "Press down a mouse button.\n"
-    "1     for     left.(default)\n"
-    "2     for     middle.\n"
-    "3     for     right.\n"
-    "4     for     wheel up.\n"
-    "5     for     wheel down.\n"
-    "--help -h           - get help\n";
+	"\x1b[1;32mUsage:\x1b[0m \x1b[31m%s\x1b[0m \x1b[1;34m[--help] <button>\x1b[0m \n"
+    "\x1b[32mPress down a mouse button.\x1b[0m\n"
+    "\x1b[32m1     for     left(default).\x1b[0m\n"
+    "\x1b[32m2     for     middle.\x1b[0m\n"
+    "\x1b[32m3     for     right.\x1b[0m\n"
+    "\x1b[32m4     for     wheel up.\x1b[0m\n"
+    "\x1b[32m5     for     wheel down.\x1b[0m\n"
+    "\x1b[1;34m--help     -h\x1b[0m           \x1b[32m- get help\x1b[0m\n";
 	
 	static struct option longopts[] = {
 		{ "help", no_argument, NULL, 'h'},
@@ -32,7 +32,7 @@ int cmd_mousedown(context_t *context) {
 				return ZDO_SUCCESS;
 				break;
 		  	default:
-				printf("unknown opt: %d\n", c);
+				zdo_alert('r', "unknown option.\n");
 				fprintf(stderr, usage, cmd);
 				return ZDO_ERROR;
 		}
@@ -44,7 +44,7 @@ int cmd_mousedown(context_t *context) {
 	else
 		ret = zdo_mousedown(1);
 	if (ret == ZDO_ERROR) {
-		fprintf(stderr, "zdo_mousedown reported an error.\n");
+		zdo_alert('r', "zdo_mousedown reported an error.\n");
 	}
 	return 1;
 }

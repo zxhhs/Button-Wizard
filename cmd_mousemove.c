@@ -12,10 +12,10 @@ int cmd_mousemove(context_t *context) {
 	char *cmd = *context->argv;
 	
 	static const char *usage =
-    "Usage: %s [--relative] [--help] <x> <y> \n"
-    "Move the mouse to the specific X and Y coordinates on the screen.\n"
-    "--relative -r       - move the pointer relative to the current position\n"
-    "--help -h           - get help\n";
+	"\x1b[1;32mUsage:\x1b[0m \x1b[31m%s\x1b[0m \x1b[1;34m[--relative] [--help] <x> <y>\x1b[0m \n"
+    "\x1b[32mMove the mouse to the specific X and Y coordinates on the screen.\x1b[0m\n"
+    "\x1b[1;34m--relative   -r\x1b[0m           \x1b[32m- move the pointer relative to the current position.\x1b[0m\n"
+    "\x1b[1;34m--help       -h\x1b[0m           \x1b[32m- get help\x1b[0m\n";
 	
 	static struct option longopts[] = {
 		{ "relative", no_argument, NULL, 'r' },
@@ -34,7 +34,7 @@ int cmd_mousemove(context_t *context) {
 				return ZDO_SUCCESS;
 				break;
 		  	default:
-				printf("unknown opt: %d\n", c);
+				zdo_alert('r', "unknown option.\n");
 				fprintf(stderr, usage, cmd);
 				return ZDO_ERROR;
 		}
@@ -42,15 +42,15 @@ int cmd_mousemove(context_t *context) {
 	consume_args(context, optind);
 	
 	if (context->argc < 2) {
+		zdo_alert('r', "You specified the wrong number of args (expected 2 coordinates).\n");
 		fprintf(stderr, usage, cmd);
-		fprintf(stderr, "You specified the wrong number of args (expected 2 coordinates).\n");
 	}
 	else {
 		x = atoi(context->argv[0]);
     	y = atoi(context->argv[1]);
     	ret = zdo_mousemove(x, y, is_rel);
     	if (ret == ZDO_ERROR) {
-			fprintf(stderr, "zdo_mousemove reported an error.\n");
+    		zdo_alert('r', "zdo_mousemove reported an error.\n");
 		}
 	}
 	

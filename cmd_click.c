@@ -13,16 +13,16 @@ int cmd_click(context_t *context) {
 	unsigned long delay = 100; // 100ms
 	
 	static const char *usage =
-    "Usage: %s [--repeat N] [--help] <button> \n"
-    "Click a mouse button.\n"
-    "1     for     left.(default)\n"
-    "2     for     middle.\n"
-    "3     for     right.\n"
-    "4     for     wheel up.\n"
-    "5     for     wheel down.\n"
-    "--repeat -r N    - repeat N times to click. Default is 1\n"
-    "--delay -d MS    - delay in MS between clicks. Default is 100ms\n"
-    "--help -h        - get help\n";
+	"\x1b[1;32mUsage:\x1b[0m \x1b[31m%s\x1b[0m \x1b[1;34m[--repeat N] [--delay MS] [--help] <button>\x1b[0m \n"
+    "\x1b[32mClick a mouse button.\x1b[0m\n"
+    "\x1b[32m1     for     left(default).\x1b[0m\n"
+    "\x1b[32m2     for     middle.\x1b[0m\n"
+    "\x1b[32m3     for     right.\x1b[0m\n"
+    "\x1b[32m4     for     wheel up.\x1b[0m\n"
+    "\x1b[32m5     for     wheel down.\x1b[0m\n"
+    "\x1b[1;34m--repeat   -r N\x1b[0m         \x1b[32m- repeat N times to click. Default is 1.\x1b[0m\n"
+    "\x1b[1;34m--delay    -d MS\x1b[0m        \x1b[32m- delay in MS between clicks. Default is 100ms.\x1b[0m\n"
+    "\x1b[1;34m--help     -h\x1b[0m           \x1b[32m- get help\x1b[0m\n";
 	
 	static struct option longopts[] = {
 		{ "repeat", required_argument, NULL, 'r'},
@@ -37,7 +37,8 @@ int cmd_click(context_t *context) {
 		  	case 'r':
 				repeat = atoi(optarg);
 				if (repeat <= 0) { 
-					fprintf(stderr, "Invalid repeat value '%s' (must be >= 1)\n", optarg);
+					zdo_alert('r', "Invalid repeat value '%s' (must be >= 1).\n", optarg);
+					//fprintf(stderr, "Invalid repeat value '%s' (must be >= 1)\n", optarg);
 					fprintf(stderr, usage, cmd);
 					return ZDO_ERROR;
 				}
@@ -50,7 +51,7 @@ int cmd_click(context_t *context) {
 				return ZDO_SUCCESS;
 				break;
 		  	default:
-				printf("unknown opt: %d\n", c);
+				zdo_alert('r', "unknown option.\n");
 				fprintf(stderr, usage, cmd);
 				return ZDO_ERROR;
 		}
@@ -62,7 +63,7 @@ int cmd_click(context_t *context) {
 	else
 		ret = zdo_click(1, repeat, delay * 1000);
 	if (ret == ZDO_ERROR) {
-		fprintf(stderr, "zdo_click reported an error.\n");
+		zdo_alert('r', "zdo_click reported an error.\n");
 	}
 	return 1;
 }

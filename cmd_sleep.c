@@ -10,9 +10,9 @@ int cmd_sleep(context_t *context) {
 	char c;
 	
 	static const char *usage =
-    "Usage: %s [--help] <seconds> \n"
-    "Sleep for seconds.\n"
-    "--help -h           - get help\n";
+	"\x1b[1;32mUsage:\x1b[0m \x1b[31m%s\x1b[0m \x1b[1;34m[--help] <seconds>\x1b[0m \n"
+    "\x1b[32mSleep for seconds.\x1b[0m\n"
+    "\x1b[1;34m--help     -h\x1b[0m           \x1b[32m- get help\x1b[0m\n";
 	
 	static struct option longopts[] = {
 		{ "help", no_argument, NULL, 'h'},
@@ -27,7 +27,7 @@ int cmd_sleep(context_t *context) {
 				return ZDO_SUCCESS;
 				break;
 		  	default:
-				printf("unknown opt: %d\n", c);
+				zdo_alert('r', "unknown option.\n");
 				fprintf(stderr, usage, cmd);
 				return ZDO_ERROR;
 		}
@@ -35,6 +35,7 @@ int cmd_sleep(context_t *context) {
 	consume_args(context, optind);
 	
 	if (context->argc == 0) {
+		zdo_alert('r', "No argument for seconds.\n");
 		fprintf(stderr, usage, cmd);
 		return 0;
 	}

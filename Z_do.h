@@ -21,5 +21,7 @@ extern int zdo_mouseup(int button);
 extern int zdo_click(int button, int repeat, unsigned long delay);
 extern int zdo_getmouselocation(int *x, int *y);
 extern void zdo_sleep(double seconds);
+extern int zdo_record(char *file, int is_continue, int mouse_mask, int key_mask);
+extern void zdo_alert(char color, char *text, ...);
 
 #endif

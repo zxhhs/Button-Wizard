@@ -36,9 +36,9 @@ static const keysym_charmap_t keysym_charmap[] = {
 	{ "semicolon", ";", 1, },
 	{ "slash", "/", 1, },
 	{ "space", " ", 1, },
+	{ "underscore", "_", 1, },
 	{ "Tab", "\t", 1, },
 	{ "Return", "\n", 1, },
-	{ "underscore", "_", 1, },
 	
 	{ "escape", "Escape", 0, },
 	{ "backSpace", "BackSpace", 0, },

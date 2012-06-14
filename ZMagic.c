@@ -22,6 +22,7 @@ struct dispatch {
   { "record", cmd_record, },
   
   { "help", cmd_help, },
+  { "alert", cmd_alert, },
   { "version", cmd_version, },
 
   { NULL, NULL, },
@@ -48,9 +49,13 @@ int ZMagic_main(int argc, char *argv[]) {
 			return cmd_exec(argc, argv);
 		}
 		else {
-			fprintf(stderr, "Command '%s' is not found.\n", argv[1]);
+			zdo_alert('r', "Command '%s' is not found.\n", argv[1]);
+			cmd_help();
 			return 1;
 		}
+	}
+	else {
+		cmd_help();
 	}
 	return 0;
 }
@@ -71,9 +76,8 @@ int cmd_exec(int argc, char *argv[]) {
 
 void consume_args(context_t *context, int count) {
 	if (count > context->argc) {
-		fprintf(stderr,
-				"Can't consume %d args; are only %d available. This is a bug.\n",
-				count, context->argc);
+		zdo_alert('r', "Can't consume %d args; are only %d available. This is a bug.\n", 
+					count, context->argc);
 		context->argv += context->argc;
 		context->argc = 0;
 		return;
@@ -81,5 +85,14 @@ void consume_args(context_t *context, int count) {
 
 	context->argv += count;
 	context->argc -= count;
+}
+
+int cmd_help() {
+	int i;
+	zdo_alert('g', "Available commands:\n");
+	for (i = 0; dispatch[i].name != NULL; i++)
+		zdo_alert('b', "--%s\n", dispatch[i].name);
+
+	return 0;
 }
 

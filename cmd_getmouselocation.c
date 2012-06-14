@@ -12,8 +12,9 @@ int cmd_getmouselocation(context_t *context) {
 	int x, y;
 	
 	static const char *usage =
-    "Usage: %s [--help] \n"
-    "--help -h        - get help\n";
+	"\x1b[1;32mUsage:\x1b[0m \x1b[31m%s\x1b[0m \x1b[1;34m[--help]\x1b[0m \n"
+    "\x1b[32mGet locations of the mouse.\x1b[0m\n"
+    "\x1b[1;34m--help     -h\x1b[0m        \x1b[32m- get help\x1b[0m\n";
 	
 	static struct option longopts[] = {
 		{ "help", no_argument, NULL, 'h'},
@@ -28,7 +29,7 @@ int cmd_getmouselocation(context_t *context) {
 				return ZDO_SUCCESS;
 				break;
 		  	default:
-				printf("unknown opt: %d\n", c);
+				zdo_alert('r', "unknown option.\n");
 				fprintf(stderr, usage, cmd);
 				return ZDO_ERROR;
 		}
@@ -37,8 +38,8 @@ int cmd_getmouselocation(context_t *context) {
 	ret = zdo_getmouselocation(&x, &y);
 	
 	if (ret) {
-		fprintf(stderr, "X=%d\n", x);
-		fprintf(stderr, "Y=%d\n", y);
+		zdo_alert('r', "X=%d\n", x);
+		zdo_alert('r', "Y=%d\n", y);
 	}
 	
 	return ret;
